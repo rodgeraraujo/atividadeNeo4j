@@ -30,8 +30,6 @@ public class App {
                 LocalDate.now(), LocalDate.now()));
 
         //Part 2 - Friedship
-        Friend friend = new Friend();
-
         dao.friendship(new Friend(2, 4, LocalDate.now()));
         dao.friendship(new Friend(2, 3, LocalDate.now()));
         dao.friendship(new Friend(2, 5, LocalDate.now()));

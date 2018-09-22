@@ -6,14 +6,13 @@ import com.rodger.aulaNeo4j.model.Follow;
 import com.rodger.aulaNeo4j.model.Friend;
 import com.rodger.aulaNeo4j.model.Post;
 import com.rodger.aulaNeo4j.model.User;
-import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.exceptions.ClientException;
-import org.neo4j.driver.v1.exceptions.NoSuchRecordException;
-
-import java.time.LocalDate;
 
 import static org.neo4j.driver.v1.Values.parameters;
-import static org.neo4j.driver.v1.Values.value;
 
 public class UserDao implements UserDaoInterface {
 
@@ -27,7 +26,7 @@ public class UserDao implements UserDaoInterface {
 
     @Override
     public boolean saveUser(User user) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run(
                     "CREATE (:User{id:$id, name:$name, email:$email, password:$password, birthday:$birthday, join_date:$join_date})",
@@ -44,15 +43,12 @@ public class UserDao implements UserDaoInterface {
         }catch (ClientException ex){
             return false;
         }
-//        session.close();
-//        driver.close();
-
         return cont > 0;
     }
 
     @Override
     public boolean friendship(Friend friendship) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run(
                     "MATCH (x:User), (y:User) WHERE x.id = $id1 AND y.id = $id2 " +
@@ -73,7 +69,7 @@ public class UserDao implements UserDaoInterface {
 
     @Override
     public boolean unfriend(Friend friendship) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run(
                     "MATCH (:User{id:$id1})-[r:FRIEND]->(:User{id:$id2}) DELETE r",
@@ -91,7 +87,7 @@ public class UserDao implements UserDaoInterface {
 
     @Override
     public boolean savePost(Post post) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run("MATCH (u:User{name:$name}) " +
                                                "CREATE (u)-[:POSTED]->(:Post{id:$post_id, user_id:$user_id, " +
@@ -113,7 +109,7 @@ public class UserDao implements UserDaoInterface {
 
     @Override
     public boolean follow(Follow following) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run(
                     "MATCH (x:User), (y:User) WHERE x.id = $follower AND y.id = $followed " +
@@ -134,7 +130,7 @@ public class UserDao implements UserDaoInterface {
 
     @Override
     public boolean unfollow(Follow following) {
-        int cont = 0;
+        int cont;
         try (Transaction tx = session.beginTransaction()) {
             StatementResult result = tx.run(
                     "MATCH (:User{id:$id1})-[r:FOLLOW]->(:User{id:$id2}) DELETE r",
